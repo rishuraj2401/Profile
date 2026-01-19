@@ -35,6 +35,10 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          # Update this to match your repository name
+          # If repo is "portfolio", use: VITE_BASE_PATH=/portfolio/
+          # If repo is root domain, use: VITE_BASE_PATH=/
+          VITE_BASE_PATH: /portfolio/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -54,4 +58,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
-

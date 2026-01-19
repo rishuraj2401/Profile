@@ -1,161 +1,211 @@
-# Deployment Guide - GitHub Pages
+# Deployment Guide - GitHub Pages & Vercel
 
-This guide will walk you through deploying your portfolio to GitHub Pages using GitHub Actions (automatic deployment).
+This guide will walk you through deploying your portfolio to GitHub Pages or Vercel.
 
-## Prerequisites
+## 🚨 Important: Base Path Configuration
 
-- A GitHub account
-- Git installed on your local machine
-- Node.js installed (for local testing)
+The white page issue is usually caused by incorrect base path configuration. Follow the instructions below based on your deployment platform.
 
-## Step 1: Create a GitHub Repository
+---
 
-1. Go to [GitHub](https://github.com) and sign in
-2. Click the **+** icon in the top right corner and select **New repository**
-3. Name your repository (e.g., `portfolio`, `rishu-portfolio`, or `my-portfolio`)
-4. Choose **Public** (GitHub Pages is free for public repos)
-5. **DO NOT** initialize with README, .gitignore, or license (we already have these)
-6. Click **Create repository**
+## Option 1: Deploy to Vercel (Recommended - Easiest)
 
-## Step 2: Update Base Path in vite.config.js
+Vercel is the easiest option and doesn't require base path configuration.
 
-**Important:** You need to update the `base` path in `vite.config.js` based on your repository name:
+### Steps:
 
-- **If your repository name is `portfolio`**: Keep `base: '/portfolio/'`
-- **If your repository name is different** (e.g., `my-portfolio`): Change to `base: '/my-portfolio/'`
-- **If you're using a custom domain or deploying from root**: Change to `base: '/'`
+1. **Push your code to GitHub** (if not already done)
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
 
-Example for repository named `my-portfolio`:
-```javascript
-base: process.env.NODE_ENV === 'production' ? '/my-portfolio/' : '/',
+2. **Go to [Vercel](https://vercel.com)** and sign in with GitHub
+
+3. **Click "New Project"** and import your repository
+
+4. **Configure Project:**
+   - Framework Preset: **Vite**
+   - Root Directory: `./` (default)
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
+
+5. **Click Deploy**
+
+6. **Your site will be live!** (e.g., `https://your-project.vercel.app`)
+
+**Note:** The `vercel.json` file is already configured for you. No base path changes needed!
+
+---
+
+## Option 2: Deploy to GitHub Pages
+
+### Step 1: Update Base Path
+
+**IMPORTANT:** You need to set the base path to match your repository name.
+
+#### Option A: Update GitHub Actions Workflow (Recommended)
+
+Edit `.github/workflows/deploy.yml` and update line 33:
+
+```yaml
+# If your repository is named "portfolio"
+VITE_BASE_PATH: /portfolio/
+
+# If your repository is named "my-portfolio"  
+VITE_BASE_PATH: /my-portfolio/
+
+# If deploying to root domain (username.github.io)
+VITE_BASE_PATH: /
 ```
 
-## Step 3: Initialize Git and Push to GitHub
+#### Option B: Update vite.config.js directly
 
-Open your terminal in the Portfolio directory and run:
+Edit `vite.config.js`:
+
+```javascript
+base: process.env.VITE_BASE_PATH || '/your-repo-name/',
+```
+
+Replace `your-repo-name` with your actual repository name.
+
+### Step 2: Create GitHub Repository
+
+1. Go to [GitHub](https://github.com) and create a new **public** repository
+2. Name it (remember this name for the base path!)
+
+### Step 3: Push Code to GitHub
 
 ```bash
-# Initialize git repository
+cd Portfolio
 git init
-
-# Add all files
 git add .
-
-# Create initial commit
 git commit -m "Initial commit: Portfolio website"
-
-# Add your GitHub repository as remote (replace YOUR_USERNAME and REPO_NAME)
-git remote add origin https://github.com/YOUR_USERNAME/REPO_NAME.git
-
-# Push to GitHub
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
 git branch -M main
 git push -u origin main
 ```
 
-**Replace:**
-- `YOUR_USERNAME` with your GitHub username
-- `REPO_NAME` with your repository name
+### Step 4: Enable GitHub Pages
 
-Example:
-```bash
-git remote add origin https://github.com/rishuraj2401/portfolio.git
-```
+1. Go to your repository → **Settings** → **Pages**
+2. Under **Source**, select **GitHub Actions**
+3. Wait for the workflow to complete (check the **Actions** tab)
 
-## Step 4: Enable GitHub Pages
-
-1. Go to your repository on GitHub
-2. Click on **Settings** (top menu)
-3. Scroll down to **Pages** in the left sidebar
-4. Under **Source**, select:
-   - **Source**: `GitHub Actions`
-5. The workflow will automatically deploy your site
-
-## Step 5: Wait for Deployment
-
-1. Go to the **Actions** tab in your repository
-2. You should see a workflow running called "Deploy to GitHub Pages"
-3. Wait for it to complete (usually 1-2 minutes)
-4. Once complete, you'll see a green checkmark
-
-## Step 6: Access Your Portfolio
+### Step 5: Access Your Site
 
 Your portfolio will be available at:
 ```
-https://YOUR_USERNAME.github.io/REPO_NAME/
+https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
 ```
 
-Example:
-```
-https://rishuraj2401.github.io/portfolio/
-```
+---
 
-## Automatic Deployment
+## Troubleshooting White Page Issue
 
-Every time you push changes to the `main` branch, GitHub Actions will automatically:
-1. Build your React app
-2. Deploy it to GitHub Pages
-3. Your site will update within 1-2 minutes
+### Check Browser Console
 
-## Manual Deployment (Alternative Method)
+1. Open your deployed site
+2. Press `F12` to open Developer Tools
+3. Go to **Console** tab
+4. Look for errors (usually 404 errors for assets)
 
-If you prefer manual deployment using `gh-pages`:
+### Common Issues & Solutions
 
-1. Install gh-pages:
+#### Issue 1: Assets Not Loading (404 errors)
+
+**Solution:** Base path is incorrect
+- For Vercel: Should be `/` (default)
+- For GitHub Pages: Should be `/REPO_NAME/`
+
+**Fix:**
+- Vercel: No changes needed, `vercel.json` handles it
+- GitHub Pages: Update `VITE_BASE_PATH` in `.github/workflows/deploy.yml`
+
+#### Issue 2: Blank White Page
+
+**Possible causes:**
+1. JavaScript errors - Check browser console
+2. Base path mismatch - Verify in `vite.config.js`
+3. Build failed - Check GitHub Actions logs
+
+**Debug steps:**
 ```bash
-npm install --save-dev gh-pages
+# Test build locally
+npm run build
+npm run preview
+
+# Check if dist folder has correct structure
+ls -la dist/
 ```
 
-2. Update `package.json` scripts (already added):
-```json
-"deploy": "npm run build && gh-pages -d dist"
-```
+#### Issue 3: Routes Not Working
 
-3. Deploy:
-```bash
-npm run deploy
-```
+**Solution:** Ensure `vercel.json` (for Vercel) or proper redirects are configured
 
-4. In GitHub Settings > Pages, set source to `gh-pages` branch
+---
 
-## Troubleshooting
+## Quick Fix Checklist
 
-### Site shows 404 or blank page
-- Check that the `base` path in `vite.config.js` matches your repository name
-- Ensure the GitHub Actions workflow completed successfully
-- Wait a few minutes for GitHub Pages to propagate
+- [ ] Base path matches repository name (for GitHub Pages)
+- [ ] Repository is public (for GitHub Pages)
+- [ ] GitHub Actions workflow completed successfully
+- [ ] No errors in browser console
+- [ ] Build completes without errors locally (`npm run build`)
+- [ ] `dist` folder contains `index.html` and `assets` folder
 
-### Assets not loading
-- Verify the `base` path is correct
-- Clear your browser cache
-- Check browser console for errors
+---
 
-### Workflow fails
-- Check the Actions tab for error messages
-- Ensure all dependencies are in `package.json`
-- Verify Node.js version compatibility
-
-### Want to use a custom domain?
-1. Add a `CNAME` file in the `public` folder with your domain
-2. Configure DNS settings with your domain provider
-3. Update GitHub Pages settings with your custom domain
-
-## Updating Your Portfolio
-
-To update your portfolio:
+## Testing Locally Before Deployment
 
 ```bash
-# Make your changes
-# Then commit and push
-git add .
-git commit -m "Update portfolio"
-git push origin main
+# Build the project
+npm run build
+
+# Preview the production build
+npm run preview
+
+# Test with base path (for GitHub Pages)
+# Install serve: npm install -g serve
+serve -s dist -l 5000
+# Then visit http://localhost:5000/portfolio/ (replace with your repo name)
 ```
 
-GitHub Actions will automatically rebuild and redeploy your site!
+---
 
-## Need Help?
+## Environment Variables
 
-- [GitHub Pages Documentation](https://docs.github.com/en/pages)
-- [Vite Deployment Guide](https://vitejs.dev/guide/static-deploy.html#github-pages)
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+You can also set the base path using environment variables:
 
+**For GitHub Pages:**
+- Set in `.github/workflows/deploy.yml` (already configured)
+
+**For Vercel:**
+- No need to set (uses `/` by default)
+
+**For local testing:**
+```bash
+VITE_BASE_PATH=/portfolio/ npm run build
+```
+
+---
+
+## Need More Help?
+
+- Check browser console for specific errors
+- Verify build output in `dist` folder
+- Check GitHub Actions logs (for GitHub Pages)
+- Check Vercel deployment logs (for Vercel)
+
+---
+
+## Recommended: Use Vercel
+
+For the easiest deployment experience, use **Vercel**:
+- ✅ No base path configuration needed
+- ✅ Automatic HTTPS
+- ✅ Custom domain support
+- ✅ Automatic deployments on git push
+- ✅ Better error messages
