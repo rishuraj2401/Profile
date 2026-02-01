@@ -58,7 +58,8 @@ const Hero = () => {
               }}
             >
               <img
-                src="https://i.pinimg.com/736x/fa/44/2d/fa442d3d5f5cc68bdcd516282c15e26d.jpg"
+                src="
+                https://portfolio-e66s.vercel.app/static/media/profilephoto.3c055dd4bac88e40cd34.jpeg"
                 alt="Coding"
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/400x400/6366f1/ffffff?text=RRS'
